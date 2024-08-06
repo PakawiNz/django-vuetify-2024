@@ -1,0 +1,53 @@
+volumes:
+  postgres_data:
+  storage_data:
+
+services:
+  db:
+    image: "postgres:alpine"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+  nginx:
+    image: "nginx:alpine"
+    restart: always
+    volumes:
+      - ./compose/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:8080"
+
+  frontend:
+    image: base-nodejs:latest
+    build:
+      dockerfile: ./compose/Dockerfile
+      context: .
+      target: base-nodejs
+    volumes:
+      - ./vue/:/app/
+      - /app/node_modules/
+    command: npm run serve
+
+  backend:
+    image: base-python:latest
+    build:
+      dockerfile: ./compose/Dockerfile
+      context: .
+      target: base-python
+    volumes:
+      - ./:/app/
+    command: python3 manage.py runserver 0.0.0.0:8000
+
+  background:
+    image: base-python:latest
+    volumes:
+      - ./:/app/
+    command: celery -A config worker -l INFO

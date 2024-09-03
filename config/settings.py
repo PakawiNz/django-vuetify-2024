@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'control.apps.ControlConfig',
     *[
         f'apps.{app_name}.apps.{pydash.pascal_case(app_name)}Config'
         for app_name in PROJECT_APPS
@@ -170,3 +172,14 @@ CACHES = {
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}/2'
 CELERY_TIME_ZONE = TIME_ZONE
 CELERY_WORKER_REDIRECT_STDOUTS_LEVEL = 'DEBUG'
+
+# visit: rest_framework/settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'control.rest_framework.authentication.LongTokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'control.rest_framework.permissions.FullDjangoModelPermissions',
+    ],
+}

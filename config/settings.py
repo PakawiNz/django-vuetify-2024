@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
+import pydash
 from environ import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,6 +35,14 @@ ALLOWED_HOSTS = ['backend'] + ([HOST_NAME] if HOST_NAME else [])
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8080'] + ([f'https://{HOST_NAME}'] if HOST_NAME else [])
 
 # Application definition
+ALLOWED_APPS = ENV('ALLOWED_APPS', list, default=[])
+
+PROJECT_APPS = [
+    app_name
+    for app_name in os.listdir('apps')
+    if os.path.exists(f'apps/{app_name}/apps.py')
+    if not ALLOWED_APPS or app_name in ALLOWED_APPS
+]
 
 INSTALLED_APPS = [
     "daphne",
@@ -43,6 +52,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    *[
+        f'apps.{app_name}.apps.{pydash.pascal_case(app_name)}Config'
+        for app_name in PROJECT_APPS
+    ],
 ]
 
 MIDDLEWARE = [

@@ -6,3 +6,4 @@ channels[daphne]==4.*
 channels_redis==4.*
 celery[redis]==5.*
 psycopg2-binary==2.*
+pydash==4.*

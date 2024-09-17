@@ -1,8 +1,9 @@
-const { defineConfig } = require('@vue/cli-service')
-module.exports = defineConfig({
+import { defineConfig } from "@vue/cli-service";
+
+export default defineConfig({
   transpileDependencies: true,
   devServer: {
     port: 8000,
-    allowedHosts: ['frontend'],
+    allowedHosts: ["frontend"],
   },
-})
+});

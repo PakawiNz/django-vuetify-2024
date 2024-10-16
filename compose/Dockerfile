@@ -1,4 +1,4 @@
-FROM node:22-slim as base-nodejs
+FROM node:22-slim as base-vue
 
 WORKDIR /app/
 

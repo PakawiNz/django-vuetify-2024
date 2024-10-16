@@ -26,11 +26,11 @@ services:
       - "8080:8080"
 
   frontend:
-    image: base-nodejs:latest
+    image: base-vue:latest
     build:
       dockerfile: ./compose/Dockerfile
       context: .
-      target: base-nodejs
+      target: base-vue
     volumes:
       - ./vue/:/app/
       - /app/node_modules/

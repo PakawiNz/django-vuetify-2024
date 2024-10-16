@@ -22,6 +22,8 @@ FROM base-vue as built-vue
 COPY ./vue/src/ /app/src/
 COPY ./vue/public/ /app/public/
 COPY ./vue/*config.js /app/
+COPY ./vue/jsconfig.json /app/
+COPY ./vue/index.html /app/
 RUN npm run build
 
 FROM base-python as built-python

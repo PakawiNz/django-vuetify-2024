@@ -16,3 +16,22 @@ WORKDIR /app/
 
 COPY ./requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
+RUN pip3 install gunicorn uvicorn[standard]
+
+FROM base-vue as built-vue
+COPY ./vue/src/ /app/src/
+COPY ./vue/public/ /app/public/
+COPY ./vue/*config.js /app/
+RUN npm run build
+
+FROM base-python as built-python
+COPY ./ /app/
+COPY --from=built-vue /app/dist/ /app/vue/dist/
+
+RUN python3 manage.py check
+RUN python3 manage.py migrate --plan
+RUN python3 manage.py collectstatic --no-input
+
+CMD gunicorn config.asgi --keep-alive 60
+
+EXPOSE 8000

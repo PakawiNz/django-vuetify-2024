@@ -44,6 +44,8 @@ services:
       target: base-python
     volumes:
       - ./:/app/
+    environment:
+      - DB_HOST=db
     command: python3 manage.py runserver 0.0.0.0:8000
 
   background:

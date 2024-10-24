@@ -28,7 +28,7 @@ ENV.read_env(env_file=str(BASE_DIR / '.env'))
 SECRET_KEY = ENV('SECRET_KEY', str, default='django-insecure-fm)$u4d@+v75_8fzihaty!y*+*dv_og18^@j0wpkp!*5v&u&gs')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = ENV('DEBUG', bool, default=True)
 
 HOST_NAME = ENV('HOST_NAME', str, default='')
 ALLOWED_HOSTS = ['backend'] + ([HOST_NAME] if HOST_NAME else [])

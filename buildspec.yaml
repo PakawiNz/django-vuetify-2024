@@ -68,7 +68,7 @@ phases:
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$VERSION
 
-      - printf '[{"name":"%s","imageUri":"%s"}]' $REPO_NAME-$ENV $REPOSITORY_URI:latest > imagedefinitions.json
+      - printf '[{"name":"gunicorn","imageUri":"%s"}]' $REPOSITORY_URI:latest > imagedefinitions.json
       - printf '[{"project":"%s","commitid":"%s"}]' $REPO_NAME $VERSION  > hashversion.json
 artifacts:
   files:

@@ -56,7 +56,7 @@ phases:
       - id=$(docker create $REPOSITORY_URI:latest)
       - docker cp $id:/app/static/ static/
       - echo $id
-      - aws s3 sync static/ s3://${S3_BUCKET}/static --delete
+      - aws s3 sync static/ s3://$REPO_NAME-$ENV-static/static --delete
 
   post_build:
     commands:

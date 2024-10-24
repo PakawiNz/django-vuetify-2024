@@ -1,0 +1,76 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - AWS_ECR_ACCOUNT_URL=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - VERSION=${COMMIT_HASH:=latest}
+      - REPOSITORY_URI=$AWS_ECR_ACCOUNT_URL/$REPO_NAME-ecr-$ENV
+
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ECR_ACCOUNT_URL
+
+      - docker pull public.ecr.aws/docker/library/python:3.12-slim &&
+        docker tag public.ecr.aws/docker/library/python:3.12-slim python:3.12-slim
+
+      - docker pull public.ecr.aws/docker/library/node:22-slim &&
+        docker tag public.ecr.aws/docker/library/node:22-slim node:22-slim
+
+      - docker pull $REPOSITORY_URI:base-vue || true
+      - docker pull $REPOSITORY_URI:base-python || true
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - echo $ENV-$CODEBUILD_BUILD_NUMBER > ./version
+      - echo $ENV-$CODEBUILD_BUILD_NUMBER > ./vue/src/assets/version
+
+      # BUILD BASE VUE AND CACHE
+      - docker build
+        --cache-from $REPOSITORY_URI:base-vue
+        --cache-from $REPOSITORY_URI:base-python
+        --target base-vue
+        -t $REPOSITORY_URI:base-vue
+        -f ./compose/Dockerfile .
+
+      # BUILD BASE PYTHON AND CACHE
+      - docker build
+        --cache-from $REPOSITORY_URI:base-vue
+        --cache-from $REPOSITORY_URI:base-python
+        --target base-python
+        -t $REPOSITORY_URI:base-python
+        -f ./compose/Dockerfile .
+
+      # BUILD FINAL IMAGE
+      - docker build
+        --cache-from $REPOSITORY_URI:base-vue
+        --cache-from $REPOSITORY_URI:base-python
+        --target built-python
+        -t $REPOSITORY_URI:latest
+        -f ./compose/Dockerfile .
+
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$VERSION
+
+      - id=$(docker create $REPOSITORY_URI:latest)
+      - docker cp $id:/app/static/ static/
+      - echo $id
+      - aws s3 sync static/ s3://${S3_BUCKET}/static --delete
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+
+      - docker push $REPOSITORY_URI:base-vue
+      - docker push $REPOSITORY_URI:base-python
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$VERSION
+
+      - printf '[{"name":"%s","imageUri":"%s"}]' $REPO_NAME-$ENV $REPOSITORY_URI:latest > imagedefinitions.json
+      - printf '[{"project":"%s","commitid":"%s"}]' $REPO_NAME $VERSION  > hashversion.json
+artifacts:
+  files:
+    - imagedefinitions.json
+    - hashversion.json

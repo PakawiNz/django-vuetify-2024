@@ -18,7 +18,7 @@ phases:
         RUN_RESULT=$(aws ecs run-task --region ap-southeast-1 --started-by "migration"
         --cluster $ECS_CLUSTER
         --task-definition $ECS_TASK_DEFINITION
-        --overrides '{"containerOverrides":[{"name": "'${ECS_CONTAINERNAME}'", "command": ["/bin/sh", "-c", "python manage.py migrate --database '${DATABASE_CONNECTION}'"]}], "cpu": "1024", "memory": "2GB"}'
+        --overrides '{"containerOverrides":[{"name": "'${ECS_CONTAINERNAME}'", "command": ["/bin/sh", "-c", "python3 manage.py migrate --database '${DATABASE_CONNECTION}'"]}], "cpu": "1024", "memory": "2GB"}'
         --launch-type FARGATE
         --network-configuration "awsvpcConfiguration={subnets=[${SUBNET}],securityGroups=[${SG}],assignPublicIp=DISABLED"})
 

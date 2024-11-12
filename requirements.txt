@@ -2,6 +2,7 @@ django==5.*
 djangorestframework==3.*
 django-redis==5.*
 django-environ
+requests==2.32.*
 channels[daphne]==4.*
 channels_redis==4.*
 celery[redis]==5.*

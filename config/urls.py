@@ -30,5 +30,6 @@ api_urlpatterns = [
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/control/', include('control.urls')),
     path('api/', include(api_urlpatterns)),
 ]

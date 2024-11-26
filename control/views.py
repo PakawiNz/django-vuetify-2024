@@ -59,7 +59,7 @@ def redirect_view(request):
             )
             if user_response.ok:
                 user_info = user_response.json()
-                user = User.objects.get_or_create(username=user_info['email'], defaults=dict(email=user_info['email']))[0]
+                user = User.objects.get_or_create(username=user_info['username'], defaults=dict(email=user_info['email']))[0]
                 login(request, user)
                 return HttpResponseRedirect('/admin/')
 

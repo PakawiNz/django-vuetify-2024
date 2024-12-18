@@ -160,15 +160,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ==============================================================================
 
-REDIS_HOST = ENV('REDIS_HOST', str, 'redis:6379')
+REDIS_ADDRESS = ENV('REDIS_ADDRESS', str, 'redis://redis:6379')  # use rediss:// for elasticache
 
-CHANNEL_REDIS_HOST = REDIS_HOST
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": (r := REDIS_HOST.split(':')) and [(r[0], int(r[1]))],
-            "db": 0,
+            "hosts": ({
+                "address": f'{REDIS_ADDRESS}/0',
+            },),
         },
     },
 }
@@ -176,14 +176,14 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f'redis://{REDIS_HOST}/1',
+        "LOCATION": f'{REDIS_ADDRESS}/1',
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
     }
 }
 
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}/2'
+CELERY_BROKER_URL = f'{REDIS_ADDRESS}/2'
 CELERY_TIME_ZONE = TIME_ZONE
 CELERY_WORKER_REDIRECT_STDOUTS_LEVEL = 'DEBUG'
 

@@ -1,3 +1,12 @@
+# Docker Compose configuration file defining a multi-service application:
+# - volumes: Defines persistent storage for postgres and general storage
+# - db: PostgreSQL database service running on Alpine Linux
+# - redis: Redis cache service running on Alpine Linux 
+# - nginx: Nginx web server that proxies requests to frontend/backend
+# - frontend: Vue.js application built from base-vue image
+# - backend: Python application built from base-python image
+# - background: Celery worker for background task processing
+
 volumes:
   postgres_data:
   storage_data:
@@ -20,6 +29,9 @@ services:
   nginx:
     image: "nginx:alpine"
     restart: always
+    depends_on:
+      - frontend
+      - backend
     volumes:
       - ./compose/nginx.conf:/etc/nginx/nginx.conf
     ports:
@@ -34,7 +46,7 @@ services:
     volumes:
       - ./vue/:/app/
       - /app/node_modules/
-    command: npm run serve
+    command: npm run dev
 
   backend:
     image: base-python:latest
